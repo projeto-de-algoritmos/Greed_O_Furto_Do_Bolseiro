@@ -45,8 +45,14 @@ fonts_dir = os.path.join(current_dir, "fonts")
 
 font_path = os.path.join(fonts_dir, "RINGM___.ttf")
 
+input_style = os.getcwd() + ".\input_style.json"
+
+manager = pygame_gui.UIManager((1600, 900), input_style)
+
+manager.get_theme().load_theme(input_style)
 
 
+clock = pygame.time.Clock()
 
 selected_items = []
 current_weight = 0
@@ -123,13 +129,21 @@ def load_image(file, width, height):
 for item in items:
     item["image"] = load_image(item["name"] + ".png", 100,100)
 
+
+
+text_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((50, 400), (900, 50)), manager=manager,
+                                               object_id='#main_text_entry')
+
 # Loop principal do jogo
 running = True
 while running:
+    UI_REFRESH_RATE = clock.tick(60)/1000
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+        #if (event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry'):
+                
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
 
@@ -145,6 +159,12 @@ while running:
                             current_weight += 1
                             current_value += item["value"]
 
+        manager.process_events(event)
+
+    manager.update(UI_REFRESH_RATE)
+
+    manager.draw_ui(screen)
+    pygame.display.update()
     draw_game()
 
     clock.tick(30)
