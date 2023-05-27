@@ -87,7 +87,6 @@ def draw_text(text, color, x, y, font_size):
     surface = font.render(text, True, color)
     screen.blit(surface, (x, y))
 
-
 def draw_item(item, x, y):
     global empty_item
     if item in empty_item:
@@ -108,18 +107,30 @@ def draw_border():
     
 
 def draw_game():
+    global selected_items
+
+    if available_weight == 0:
+        color = RED
+    else:
+        color = WHITE
+
     screen.fill(BLACK)
     draw_border()
     background_image = load_image("thief2.jpg",528,810)
     screen.blit(background_image[1], (WIDTH - (WIDTH * 0.44), HEIGHT - (HEIGHT * 0.80)))
     draw_text("Selected items", WHITE, WIDTH - (WIDTH * 0.13), HEIGHT - (HEIGHT * 0.98), 19)
-    draw_text("Available weight", WHITE,  WIDTH - (WIDTH * 0.28), HEIGHT - (HEIGHT * 0.98), 19)
-    draw_text("{} kg".format(available_weight), WHITE,  WIDTH - (WIDTH * 0.22), HEIGHT - (HEIGHT * 0.95), 19)
+    draw_text("Available weight", color,  WIDTH - (WIDTH * 0.28), HEIGHT - (HEIGHT * 0.98), 19)
+    draw_text("{} kg".format(available_weight), color,  WIDTH - (WIDTH * 0.22), HEIGHT - (HEIGHT * 0.95), 19)
     draw_text("Current value", WHITE,  WIDTH - (WIDTH * 0.43), HEIGHT - (HEIGHT * 0.98), 19)
     draw_text("{}".format(current_value), WHITE,  WIDTH - (WIDTH * 0.38), HEIGHT - (HEIGHT * 0.95), 19)
     
     for i, item in enumerate(items):
         draw_item(item, 10, 50 + i * 115)
+
+    for i, item in enumerate(selected_items):
+        
+        draw_text("{}".format(item["name"]), WHITE, WIDTH - (WIDTH * 0.13), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.98), 15)
+        draw_text("{}".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.08), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.98), 15)
 
 
 def knapsack():
@@ -141,6 +152,11 @@ def load_image(file, width, height):
     image_loc = image.get_rect()
     return image_loc, image
 
+def procura_item(item):
+    for i in range(len(selected_items)):
+        if selected_items[i]["name"] == item:
+            return i
+
 def math_weight(item, text):
     global available_weight, current_value, selected_items, empty_item
 
@@ -153,12 +169,12 @@ def math_weight(item, text):
         if items[item]["weight"] == 0:
            empty_item.append(items[item])
         
-        if items[item]["name"] in selected_items:
-            selected_items["weight"] += float(text)
+        aux = procura_item(items[item]["name"])
+        if aux != None:
+            selected_items[aux]["weight"] += float(text)
         else:
-            selected_items.append([items[item]["name"],float(text)])
-        
-        print (selected_items)
+            selected_items.append({"name":items[item]["name"],"weight":float(text)})
+
 
 for item in items:
     item["image"] = load_image(item["name"] + ".png", 100,100)
