@@ -20,14 +20,11 @@ MAX_CAPACITY = 30
 
 # Itens disponíveis
 items = [
-    {"name": "dark_blue_arkenstone", "value": 5, "image": None, "nickname":"Dark Blue Arkenstone"},
-    {"name": "light_blue_arkenstone", "value": 5, "image": None, "nickname":"Light Blue Arkenstone"},
-    {"name": "gold_coins", "value": 5, "image": None, "nickname":"Gold"},
-    {"name": "red_gems", "value": 5, "image": None, "nickname":"Red Gems"},
-    {"name": "green_gems", "value": 5, "image": None, "nickname":"Green Gems"}
-    #{"name": "Moeda de prata", "weight": 3, "value": 2.5, "image": None},
-    #{"name": "Moeda de bronze", "weight": 3, "value": 1, "image": None},
-    #{"name": "Diamante", "weight": 5, "value": 10, "image": None},
+    {"name": "dark_blue_arkenstone", "value": 13, "weight": 0 ,"image": None, "nickname":"Dark Blue Arkenstone"},
+    {"name": "light_blue_arkenstone", "value": 12,"weight": 0 ,"image": None, "nickname":"Light Blue Arkenstone"},
+    {"name": "gold_coins", "value": 1, "weight": 0 , "image": None, "nickname":"Gold"},
+    {"name": "red_gems", "value": 5, "weight": 0 ,"image": None, "nickname":"Red Gems"},
+    {"name": "green_gems", "value": 7,"weight": 0 , "image": None, "nickname":"Green Gems"}
 ]
 
 # Inicialização da janela do jogo
@@ -43,25 +40,48 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 fonts_dir = os.path.join(current_dir, "fonts")
 
 
-font_path = os.path.join(fonts_dir, "RINGM___.ttf")
+font_path = os.path.join(fonts_dir, "blackchancery.regular.ttf")
 
-input_style = os.getcwd() + ".\input_style.json"
+input_style = os.getcwd() + "input_style.json"
 
-manager = pygame_gui.UIManager((1600, 900), input_style)
+manager = pygame_gui.UIManager((1200, 700), input_style)
 
 manager.get_theme().load_theme(input_style)
+
+text_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((10 + (WIDTH * 0.27) , 100), (100, 30)), manager=manager,
+                                                object_id='#main_text_entry')
+text_input2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((10 + (WIDTH * 0.27), 215), (100, 30)), manager=manager,
+                                                object_id='#main_text_entry2')
+text_input3 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((10 + (WIDTH * 0.27), 330), (100, 30)), manager=manager,
+                                                object_id='#main_text_entry3')
+text_input4 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((10 + (WIDTH * 0.27), 445), (100, 30)), manager=manager,
+                                                object_id='#main_text_entry4')
+text_input5 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((10 + (WIDTH * 0.27), 560), (100, 30)), manager=manager,
+                                                object_id='#main_text_entry5')
 
 
 clock = pygame.time.Clock()
 
 selected_items = []
-current_weight = 0
+empty_item = []
+available_weight = 0
 current_value = 0
 
-def ramdom_items():
-    global items
-    
+def ramdom_pesos(items):
+    global available_weight
+    available_weight = random.randint(20,50)
+    aux = available_weight * 3
 
+    items[0]["weight"] = random.randint(1,7)
+    items[1]["weight"] = random.randint(1,7)
+
+    for item in items:
+        temp = random.randint(7,aux//2)
+        if aux - temp >= 0 and item["weight"] == 0:
+            item["weight"] += temp
+            aux -= temp
+    return items
+    
 def draw_text(text, color, x, y, font_size):
     font = pygame.font.Font(font_path, font_size)
     surface = font.render(text, True, color)
@@ -69,7 +89,8 @@ def draw_text(text, color, x, y, font_size):
 
 
 def draw_item(item, x, y):
-    if item in selected_items:
+    global empty_item
+    if item in empty_item:
         color = RED
     else:
         color = GREEN
@@ -78,7 +99,7 @@ def draw_item(item, x, y):
     draw_text("Value", color, x + (WIDTH * 0.10), y + (HEIGHT * 0.06), 17)
     draw_text("{}".format(item["value"]), color, x + (WIDTH * 0.12), y + (HEIGHT * 0.08),22) # o valor mostrado deve ser a multiplicacao do peso pelo value
     draw_text("Weigth", color, x + (WIDTH * 0.20), y + (HEIGHT * 0.06), 17)
-    draw_text("{} kg".format(10), color, x + (WIDTH * 0.22), y + (HEIGHT * 0.08), 21) # o peso gerado aleatoriamente entra aqui
+    draw_text("{} kg".format(item["weight"]), color, x + (WIDTH * 0.22), y + (HEIGHT * 0.08), 21) # o peso gerado aleatoriamente entra aqui
     
 def draw_border():
     border = load_image("borda_lotr.png",220,80)
@@ -92,32 +113,26 @@ def draw_game():
     background_image = load_image("thief2.jpg",528,810)
     screen.blit(background_image[1], (WIDTH - (WIDTH * 0.44), HEIGHT - (HEIGHT * 0.80)))
     draw_text("Selected items", WHITE, WIDTH - (WIDTH * 0.13), HEIGHT - (HEIGHT * 0.98), 19)
-    draw_text("Current weight", WHITE,  WIDTH - (WIDTH * 0.28), HEIGHT - (HEIGHT * 0.98), 19)
-    draw_text("{} kg".format(current_weight), WHITE,  WIDTH - (WIDTH * 0.22), HEIGHT - (HEIGHT * 0.95), 19)
+    draw_text("Available weight", WHITE,  WIDTH - (WIDTH * 0.28), HEIGHT - (HEIGHT * 0.98), 19)
+    draw_text("{} kg".format(available_weight), WHITE,  WIDTH - (WIDTH * 0.22), HEIGHT - (HEIGHT * 0.95), 19)
     draw_text("Current value", WHITE,  WIDTH - (WIDTH * 0.43), HEIGHT - (HEIGHT * 0.98), 19)
     draw_text("{}".format(current_value), WHITE,  WIDTH - (WIDTH * 0.38), HEIGHT - (HEIGHT * 0.95), 19)
-
     
     for i, item in enumerate(items):
-        draw_item(item, 10, 40 + i * 115)
-
-    pygame.display.flip()
+        draw_item(item, 10, 50 + i * 115)
 
 
 def knapsack():
-    global current_weight, current_value
-
-    current_weight = 0
-    current_value = 0
+    global available_weight, current_value
 
     selected_items.clear()
 
     items.sort(key=lambda x: x["value"] / x["weight"], reverse=True)
 
     for item in items:
-        if current_weight + item["weight"] <= MAX_CAPACITY:
+        if available_weight + item["weight"] <= MAX_CAPACITY:
             selected_items.append(item)
-            current_weight += item["weight"]
+            available_weight += item["weight"]
             current_value += item["value"]
 
 def load_image(file, width, height):
@@ -126,38 +141,76 @@ def load_image(file, width, height):
     image_loc = image.get_rect()
     return image_loc, image
 
+def math_weight(item, text):
+    global available_weight, current_value, selected_items, empty_item
+
+    aux = available_weight - float(text)
+
+    if aux >= 0 and float(text) <= items[item]["weight"]:
+        available_weight -= float(text)
+        current_value += float(text)*items[item]["value"]
+        items[item]["weight"] -= float(text)
+        if items[item]["weight"] == 0:
+           empty_item.append(items[item])
+        
+        if items[item]["name"] in selected_items:
+            selected_items["weight"] += float(text)
+        else:
+            selected_items.append([items[item]["name"],float(text)])
+        
+        print (selected_items)
+
 for item in items:
     item["image"] = load_image(item["name"] + ".png", 100,100)
 
 
-
-text_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((50, 400), (900, 50)), manager=manager,
-                                               object_id='#main_text_entry')
+total_time = 30
+current_time = 0
+starting_time = pygame.time.get_ticks()
 
 # Loop principal do jogo
 running = True
-while running:
+items = ramdom_pesos(items)
+font = pygame.font.Font(font_path, 24)
+while current_time <= total_time:
+    current_time = (pygame.time.get_ticks() - starting_time) / 1000
     UI_REFRESH_RATE = clock.tick(60)/1000
-    
+    time_text = font.render("Time: {:.1f}".format(current_time), True, (255, 255, 255))
+    screen.blit(time_text, (10, 10))  # Desenhar o texto na tela
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        #if (event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry'):
-                
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
 
-            for i, item in enumerate(items):
-                if 10 <= pos[0] <= 110 and 100 + i * 105 <= pos[1] <= 150 + i * 105:
-                    if item in selected_items:
-                        selected_items.remove(item)
-                        current_weight -= 1
-                        current_value -= item["value"]
-                    else:
-                        if current_weight + 1 <= MAX_CAPACITY:
-                            selected_items.append(item)
-                            current_weight += 1
-                            current_value += item["value"]
+        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry':
+            try:
+                float(event.text)
+                math_weight(0,event.text)
+            except ValueError:
+                print("Not a float")
+        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry2':
+            try:
+                float(event.text)
+                math_weight(1,event.text)
+            except ValueError:
+                print("Not a float")
+        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry3':
+            try:
+                float(event.text)
+                math_weight(2,event.text)
+            except ValueError:
+                print("Not a float")
+        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry4':
+            try:
+                float(event.text)
+                math_weight(3,event.text)
+            except ValueError:
+                print("Not a float")
+        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry5':
+            try:
+                float(event.text)
+                math_weight(4,event.text)
+            except ValueError:
+                print("Not a float")
 
         manager.process_events(event)
 
@@ -167,7 +220,7 @@ while running:
     pygame.display.update()
     draw_game()
 
-    clock.tick(30)
+    clock.tick(60)
 
 # Encerramento do Pygame
 pygame.quit()
