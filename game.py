@@ -2,6 +2,7 @@ import pygame
 import random
 import os
 import pygame_gui
+import copy
 # Inicialização do Pygame
 pygame.init()
 
@@ -66,6 +67,7 @@ selected_items = []
 empty_item = []
 available_weight = 0
 current_value = 0
+
 
 def ramdom_pesos(items):
     global available_weight, MAX_CAPACITY
@@ -172,21 +174,23 @@ def endgame():
         pygame.display.update()
 
 def knapsack():
-    global  MAX_CAPACITY, items
+    global  MAX_CAPACITY, base_items
+
+    print(base_items)
 
     items_snapsack = []
     value_snapsack = 0
     current_weight_snapsack = 0
-    items.sort(key=lambda x: x["value"] / x["weight"], reverse=True)
+    base_items.sort(key=lambda x: x["value"] / x["weight"], reverse=True)
 
-    for item in items:
+    for item in base_items:
         aux = 0
         if current_weight_snapsack + item["weight"] <= MAX_CAPACITY:
             aux = item["weight"]
-            items_snapsack.append((item["name"] , item["weight"]))
+            items_snapsack.append({"nickname":item["nickname"],"weight":float(aux)})
         else:
             aux = MAX_CAPACITY - current_weight_snapsack
-            items_snapsack.append((item["name"] ,aux))
+            items_snapsack.append({"nickname":item["nickname"],"weight":float(aux)})
 
         current_weight_snapsack += aux
         value_snapsack += item["value"] * aux
@@ -222,21 +226,19 @@ def math_weight(item, text):
         else:
             selected_items.append({"nickname":items[item]["nickname"],"weight":float(text)})
 
+items = ramdom_pesos(items)
+base_items = copy.deepcopy(items)
 
 for item in items:
     item["image"] = load_image(item["name"] + ".png", 100,100)
 
 
-total_time = 3
+total_time = 30
 current_time = 0
 starting_time = pygame.time.get_ticks()
 timer_visible = True
 # Loop principal do jogo
 running = True
-items = ramdom_pesos(items)
-a, b = knapsack()
-print(a)
-print(b)
 
 font = pygame.font.Font(font_path, 24)
 while running:
@@ -245,6 +247,11 @@ while running:
     if current_time >= total_time:
         timer_visible = False
         endgame()
+    
+    if available_weight == 0:
+        timer_visible = False
+        endgame()
+
     UI_REFRESH_RATE = clock.tick(60)/1000
     time_text = font.render("Time: {:.1f}".format(current_time), True, (255, 255, 255))
     if timer_visible:
