@@ -16,7 +16,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
 # Configurações da mochila
-MAX_CAPACITY = 30
+MAX_CAPACITY = random.randint(20, 50)
 
 # Itens disponíveis
 items = [
@@ -68,8 +68,8 @@ available_weight = 0
 current_value = 0
 
 def ramdom_pesos(items):
-    global available_weight
-    available_weight = random.randint(20,50)
+    global available_weight, MAX_CAPACITY
+    available_weight = MAX_CAPACITY
     aux = available_weight * 3
 
     items[0]["weight"] = random.randint(1,7)
@@ -134,17 +134,26 @@ def draw_game():
 
 
 def knapsack():
-    global available_weight, current_value
+    global  MAX_CAPACITY, items
 
-    selected_items.clear()
-
+    items_snapsack = []
+    value_snapsack = 0
+    current_weight_snapsack = 0
     items.sort(key=lambda x: x["value"] / x["weight"], reverse=True)
 
     for item in items:
-        if available_weight + item["weight"] <= MAX_CAPACITY:
-            selected_items.append(item)
-            available_weight += item["weight"]
-            current_value += item["value"]
+        aux = 0
+        if current_weight_snapsack + item["weight"] <= MAX_CAPACITY:
+            aux = item["weight"]
+            items_snapsack.append((item["name"] , item["weight"]))
+        else:
+            aux = MAX_CAPACITY - current_weight_snapsack
+            items_snapsack.append((item["name"] ,aux))
+
+        current_weight_snapsack += aux
+        value_snapsack += item["value"] * aux
+    
+    return items_snapsack, value_snapsack
 
 def load_image(file, width, height):
     image = pygame.image.load(f'images/{file}')
@@ -187,6 +196,10 @@ starting_time = pygame.time.get_ticks()
 # Loop principal do jogo
 running = True
 items = ramdom_pesos(items)
+a, b = knapsack()
+print(a)
+print(b)
+
 font = pygame.font.Font(font_path, 24)
 while current_time <= total_time:
     current_time = (pygame.time.get_ticks() - starting_time) / 1000
