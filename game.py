@@ -132,6 +132,44 @@ def draw_game():
         draw_text("{}".format(item["nickname"]), WHITE, WIDTH - (WIDTH * 0.14), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.97), 15)
         draw_text("{} kg".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.04), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.97), 15)
 
+def endgame():
+    MENU_MOUSE_POS = pygame.mouse.get_pos()
+    text_input.visible = False
+    text_input2.visible = False
+    text_input3.visible = False
+    text_input4.visible = False
+    text_input5.visible = False
+
+    screen.fill(BLACK)
+    draw_text("Game Over, Mr. Baggins", WHITE, WIDTH * 0.33, HEIGHT - (HEIGHT * 0.97), 30)
+
+    MENU_BUTTON = pygame.Rect((WIDTH / 2) - 150, HEIGHT - 125, 300, 50)
+    MENU_TEXT = font.render("Return to main menu", True, WHITE)
+    MENU_TEXT_RECT = MENU_TEXT.get_rect(center=MENU_BUTTON.center)
+
+    QUIT_BUTTON = pygame.Rect((WIDTH / 2) - 150, (HEIGHT - 125) + (HEIGHT * 0.10), 300, 50)
+    QUIT_TEXT = font.render("Exit", True, WHITE)
+    QUIT_TEXT_RECT = QUIT_TEXT.get_rect(center=QUIT_BUTTON.center)
+
+    pygame.draw.rect(screen, RED, MENU_BUTTON)
+    pygame.draw.rect(screen, RED, QUIT_BUTTON)
+
+    screen.blit(MENU_TEXT, MENU_TEXT_RECT)
+    screen.blit(QUIT_TEXT, QUIT_TEXT_RECT)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if MENU_BUTTON.collidepoint(MENU_MOUSE_POS):
+                print("Menu principal")
+
+            if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
 
 def knapsack():
     global  MAX_CAPACITY, items
@@ -189,10 +227,10 @@ for item in items:
     item["image"] = load_image(item["name"] + ".png", 100,100)
 
 
-total_time = 30
+total_time = 3
 current_time = 0
 starting_time = pygame.time.get_ticks()
-
+timer_visible = True
 # Loop principal do jogo
 running = True
 items = ramdom_pesos(items)
@@ -201,11 +239,16 @@ print(a)
 print(b)
 
 font = pygame.font.Font(font_path, 24)
-while current_time <= total_time:
+while running:
+    
     current_time = (pygame.time.get_ticks() - starting_time) / 1000
+    if current_time >= total_time:
+        timer_visible = False
+        endgame()
     UI_REFRESH_RATE = clock.tick(60)/1000
     time_text = font.render("Time: {:.1f}".format(current_time), True, (255, 255, 255))
-    screen.blit(time_text, (10, 10))  # Desenhar o texto na tela
+    if timer_visible:
+        screen.blit(time_text, (10, 10))  # Desenhar o texto na tela
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -250,6 +293,7 @@ while current_time <= total_time:
     draw_game()
 
     clock.tick(60)
+
 
 # Encerramento do Pygame
 pygame.quit()
