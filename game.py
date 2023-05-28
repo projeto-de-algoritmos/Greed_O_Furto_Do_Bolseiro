@@ -20,8 +20,8 @@ MAX_CAPACITY = 30
 
 # Itens disponíveis
 items = [
-    {"name": "dark_blue_arkenstone", "value": 13, "weight": 0 ,"image": None, "nickname":"Dark Blue Arkenstone"},
-    {"name": "light_blue_arkenstone", "value": 12,"weight": 0 ,"image": None, "nickname":"Light Blue Arkenstone"},
+    {"name": "dark_blue_arkenstone", "value": 13, "weight": 0 ,"image": None, "nickname":"Dark Blue Arken"},
+    {"name": "light_blue_arkenstone", "value": 12,"weight": 0 ,"image": None, "nickname":"Light Blue Arken"},
     {"name": "gold_coins", "value": 1, "weight": 0 , "image": None, "nickname":"Gold"},
     {"name": "red_gems", "value": 5, "weight": 0 ,"image": None, "nickname":"Red Gems"},
     {"name": "green_gems", "value": 7,"weight": 0 , "image": None, "nickname":"Green Gems"}
@@ -120,17 +120,17 @@ def draw_game():
     screen.blit(background_image[1], (WIDTH - (WIDTH * 0.44), HEIGHT - (HEIGHT * 0.80)))
     draw_text("Selected items", WHITE, WIDTH - (WIDTH * 0.13), HEIGHT - (HEIGHT * 0.98), 19)
     draw_text("Available weight", color,  WIDTH - (WIDTH * 0.28), HEIGHT - (HEIGHT * 0.98), 19)
-    draw_text("{} kg".format(available_weight), color,  WIDTH - (WIDTH * 0.22), HEIGHT - (HEIGHT * 0.95), 19)
+    draw_text("{} kg".format(available_weight), color,  WIDTH - (WIDTH * 0.25), HEIGHT - (HEIGHT * 0.95), 19)
     draw_text("Current value", WHITE,  WIDTH - (WIDTH * 0.43), HEIGHT - (HEIGHT * 0.98), 19)
-    draw_text("{}".format(current_value), WHITE,  WIDTH - (WIDTH * 0.38), HEIGHT - (HEIGHT * 0.95), 19)
+    draw_text("{}".format(current_value), WHITE,  WIDTH - (WIDTH * 0.40), HEIGHT - (HEIGHT * 0.95), 19)
     
     for i, item in enumerate(items):
         draw_item(item, 10, 50 + i * 115)
 
     for i, item in enumerate(selected_items):
         
-        draw_text("{}".format(item["name"]), WHITE, WIDTH - (WIDTH * 0.13), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.98), 15)
-        draw_text("{}".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.08), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.98), 15)
+        draw_text("{}".format(item["nickname"]), WHITE, WIDTH - (WIDTH * 0.14), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.97), 15)
+        draw_text("{} kg".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.04), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.97), 15)
 
 
 def knapsack():
@@ -154,7 +154,7 @@ def load_image(file, width, height):
 
 def procura_item(item):
     for i in range(len(selected_items)):
-        if selected_items[i]["name"] == item:
+        if selected_items[i]["nickname"] == item:
             return i
 
 def math_weight(item, text):
@@ -169,11 +169,11 @@ def math_weight(item, text):
         if items[item]["weight"] == 0:
            empty_item.append(items[item])
         
-        aux = procura_item(items[item]["name"])
+        aux = procura_item(items[item]["nickname"])
         if aux != None:
             selected_items[aux]["weight"] += float(text)
         else:
-            selected_items.append({"name":items[item]["name"],"weight":float(text)})
+            selected_items.append({"nickname":items[item]["nickname"],"weight":float(text)})
 
 
 for item in items:
