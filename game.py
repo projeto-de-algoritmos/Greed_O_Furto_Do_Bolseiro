@@ -135,6 +135,9 @@ def draw_game():
         draw_text("{} kg".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.04), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.97), 15)
 
 def endgame():
+    global selected_items
+    print(selected_items)
+
     MENU_MOUSE_POS = pygame.mouse.get_pos()
     text_input.visible = False
     text_input2.visible = False
@@ -143,7 +146,7 @@ def endgame():
     text_input5.visible = False
 
     screen.fill(BLACK)
-    draw_text("Game Over, Mr. Baggins", WHITE, WIDTH * 0.33, HEIGHT - (HEIGHT * 0.97), 30)
+    draw_text("Game Over, Mr. Baggins", WHITE, WIDTH * 0.45, HEIGHT - (HEIGHT * 0.97), 30)
 
     MENU_BUTTON = pygame.Rect((WIDTH / 2) - 150, HEIGHT - 125, 300, 50)
     MENU_TEXT = font.render("Return to main menu", True, WHITE)
@@ -158,6 +161,27 @@ def endgame():
 
     screen.blit(MENU_TEXT, MENU_TEXT_RECT)
     screen.blit(QUIT_TEXT, QUIT_TEXT_RECT)
+
+    # Escolhas do jogador
+    draw_text("Your choices", WHITE, WIDTH - (WIDTH * 0.34), HEIGHT - (HEIGHT * 0.90), 25)
+    total_value_player = 0
+    for i, item in enumerate(selected_items):
+        
+        draw_text("{}".format(item["nickname"]), WHITE, WIDTH - (WIDTH * 0.34), ((i+1) * 25) + HEIGHT - (HEIGHT * 0.80), 20)
+        draw_text("{} kg".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.14), ((i+1) * 25) + HEIGHT - (HEIGHT * 0.80), 20)
+        total_value_player +=  item["value"] * item["weight"]
+
+    draw_text("Total value: {}".format(total_value_player), GREEN, WIDTH - (WIDTH * 0.34), HEIGHT - 325, 25)
+
+    # Itens do knapsack
+    items_knapsack, total_value_knapsack = knapsack()
+    draw_text("Maximum value possible: ", WHITE, WIDTH - (WIDTH * 0.74), HEIGHT - (HEIGHT * 0.90), 25)
+    for i, item in enumerate(items_knapsack):
+        
+        draw_text("{}".format(item["nickname"]), WHITE, WIDTH - (WIDTH * 0.74), ((i+1) * 25) + HEIGHT - (HEIGHT * 0.80), 20)
+        draw_text("{} kg".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.54), ((i+1) * 25) + HEIGHT - (HEIGHT * 0.80), 20)
+
+    draw_text("Total value: {}".format(total_value_knapsack), GREEN, WIDTH - (WIDTH * 0.74), HEIGHT - 325, 25)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -178,24 +202,24 @@ def knapsack():
 
     print(base_items)
 
-    items_snapsack = []
-    value_snapsack = 0
-    current_weight_snapsack = 0
+    items_knapsack = []
+    value_knapsack = 0
+    current_weight_knapsack = 0
     base_items.sort(key=lambda x: x["value"] / x["weight"], reverse=True)
 
     for item in base_items:
         aux = 0
-        if current_weight_snapsack + item["weight"] <= MAX_CAPACITY:
+        if current_weight_knapsack + item["weight"] <= MAX_CAPACITY:
             aux = item["weight"]
-            items_snapsack.append({"nickname":item["nickname"],"weight":float(aux)})
+            items_knapsack.append({"nickname":item["nickname"],"weight":float(aux)})
         else:
-            aux = MAX_CAPACITY - current_weight_snapsack
-            items_snapsack.append({"nickname":item["nickname"],"weight":float(aux)})
+            aux = MAX_CAPACITY - current_weight_knapsack
+            items_knapsack.append({"nickname":item["nickname"],"weight":float(aux)})
 
-        current_weight_snapsack += aux
-        value_snapsack += item["value"] * aux
+        current_weight_knapsack += aux
+        value_knapsack += item["value"] * aux
     
-    return items_snapsack, value_snapsack
+    return items_knapsack, value_knapsack
 
 def load_image(file, width, height):
     image = pygame.image.load(f'images/{file}')
@@ -224,7 +248,7 @@ def math_weight(item, text):
         if aux != None:
             selected_items[aux]["weight"] += float(text)
         else:
-            selected_items.append({"nickname":items[item]["nickname"],"weight":float(text)})
+            selected_items.append({"nickname":items[item]["nickname"],"weight":float(text), "value":items[item]["value"]})
 
 items = ramdom_pesos(items)
 base_items = copy.deepcopy(items)
@@ -245,6 +269,7 @@ while running:
     
     current_time = (pygame.time.get_ticks() - starting_time) / 1000
     if current_time >= total_time:
+        print(selected_items)
         timer_visible = False
         endgame()
     
