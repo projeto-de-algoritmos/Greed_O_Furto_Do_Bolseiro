@@ -3,6 +3,7 @@ import random
 import os
 import pygame_gui
 import copy
+import sys
 # Inicialização do Pygame
 pygame.init()
 
@@ -15,18 +16,6 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-
-# Configurações da mochila
-MAX_CAPACITY = random.randint(20, 50)
-
-# Itens disponíveis
-items = [
-    {"name": "dark_blue_arkenstone", "value": 13, "weight": 0 ,"image": None, "nickname":"Dark Blue Arken"},
-    {"name": "light_blue_arkenstone", "value": 12,"weight": 0 ,"image": None, "nickname":"Light Blue Arken"},
-    {"name": "gold_coins", "value": 1, "weight": 0 , "image": None, "nickname":"Gold"},
-    {"name": "red_gems", "value": 5, "weight": 0 ,"image": None, "nickname":"Red Gems"},
-    {"name": "green_gems", "value": 7,"weight": 0 , "image": None, "nickname":"Green Gems"}
-]
 
 # Inicialização da janela do jogo
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -135,8 +124,7 @@ def draw_game():
         draw_text("{} kg".format(item["weight"]), WHITE, WIDTH - (WIDTH * 0.04), ((i+1) * 20) + HEIGHT - (HEIGHT * 0.97), 15)
 
 def endgame():
-    global selected_items
-    print(selected_items)
+    global selected_items, empty_item, available_weight, current_value, items, base_items
 
     MENU_MOUSE_POS = pygame.mouse.get_pos()
     text_input.visible = False
@@ -189,7 +177,7 @@ def endgame():
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if MENU_BUTTON.collidepoint(MENU_MOUSE_POS):
-                print("Menu principal")
+                main_menu()
 
             if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
                 pygame.quit()
@@ -199,8 +187,6 @@ def endgame():
 
 def knapsack():
     global  MAX_CAPACITY, base_items
-
-    print(base_items)
 
     items_knapsack = []
     value_knapsack = 0
@@ -250,82 +236,156 @@ def math_weight(item, text):
         else:
             selected_items.append({"nickname":items[item]["nickname"],"weight":float(text), "value":items[item]["value"]})
 
-items = ramdom_pesos(items)
-base_items = copy.deepcopy(items)
+def main_menu():
+    global selected_items, empty_item, available_weight, current_value, items, base_items
+    while True:
+        screen.fill(WHITE)
 
-for item in items:
-    item["image"] = load_image(item["name"] + ".png", 100,100)
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
 
+        # Texto do titulo
 
-total_time = 30
-current_time = 0
-starting_time = pygame.time.get_ticks()
-timer_visible = True
-# Loop principal do jogo
-running = True
+        MENU_TEXT = font.render("TIP TOE - FALL GUYS", True, WHITE)
+        MENU_RECT = MENU_TEXT.get_rect(center=(WIDTH/2, HEIGHT * 0.2))
+
+        # Texto do rodape
+
+        FOOTER_TEXT = font.render(
+            "Trabalho de Grafos 1 - @AntonioRangelC e @kessJhones", True, WHITE)
+        FOOTER_RECT = FOOTER_TEXT.get_rect(center=(WIDTH/2, HEIGHT*0.9))
+
+        # Definir os botões
+
+        PLAY_BUTTON = pygame.Rect((WIDTH/3), (HEIGHT/3), 300, 50)
+        PLAY_TEXT = font.render("Start", True, WHITE)
+        PLAY_TEXT_RECT = PLAY_TEXT.get_rect(center=PLAY_BUTTON.center)
+
+        QUIT_BUTTON = pygame.Rect(
+            (WIDTH/3), (HEIGHT/3) + (HEIGHT * 0.30), 300, 50)
+        QUIT_TEXT = font.render("Quit", True, WHITE)
+        QUIT_TEXT_RECT = QUIT_TEXT.get_rect(center=QUIT_BUTTON.center)
+
+        pygame.draw.rect(screen, BLACK, PLAY_BUTTON)
+        pygame.draw.rect(screen, BLACK, QUIT_BUTTON)
+
+        screen.blit(MENU_TEXT, MENU_RECT)
+        screen.blit(PLAY_TEXT, PLAY_TEXT_RECT)
+        screen.blit(QUIT_TEXT, QUIT_TEXT_RECT)
+        screen.blit(FOOTER_TEXT, FOOTER_RECT)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    config_items()
+                    text_input.visible = True
+                    text_input2.visible = True
+                    text_input3.visible = True
+                    text_input4.visible = True
+                    text_input5.visible = True
+                    game()
+                if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
+
+def config_items():
+    global items, base_items, selected_items, empty_item, available_weight, current_value, MAX_CAPACITY
+    selected_items = []
+    empty_item = []
+    available_weight = 0
+    current_value = 0
+
+    # Configurações da mochila
+    MAX_CAPACITY = random.randint(20, 50)
+
+    # Itens disponíveis
+    items = [
+        {"name": "dark_blue_arkenstone", "value": 13, "weight": 0 ,"image": None, "nickname":"Dark Blue Arken"},
+        {"name": "light_blue_arkenstone", "value": 12,"weight": 0 ,"image": None, "nickname":"Light Blue Arken"},
+        {"name": "gold_coins", "value": 1, "weight": 0 , "image": None, "nickname":"Gold"},
+        {"name": "red_gems", "value": 5, "weight": 0 ,"image": None, "nickname":"Red Gems"},
+        {"name": "green_gems", "value": 7,"weight": 0 , "image": None, "nickname":"Green Gems"}
+    ]
+
+    items = ramdom_pesos(items)
+    base_items = copy.deepcopy(items)
+
+    for item in items:
+        item["image"] = load_image(item["name"] + ".png", 100,100)
+
 
 font = pygame.font.Font(font_path, 24)
-while running:
-    
-    current_time = (pygame.time.get_ticks() - starting_time) / 1000
-    if current_time >= total_time:
-        print(selected_items)
-        timer_visible = False
-        endgame()
-    
-    if available_weight == 0:
-        timer_visible = False
-        endgame()
+def game():
+    total_time = 30
+    current_time = 0
+    starting_time = pygame.time.get_ticks()
+    timer_visible = True
+    running = True
+    while running:
+        
+        current_time = (pygame.time.get_ticks() - starting_time) / 1000
+        if current_time >= total_time:
+            timer_visible = False
+            endgame()
+        
+        if available_weight == 0:
+            timer_visible = False
+            endgame()
 
-    UI_REFRESH_RATE = clock.tick(60)/1000
-    time_text = font.render("Time: {:.1f}".format(current_time), True, (255, 255, 255))
-    if timer_visible:
-        screen.blit(time_text, (10, 10))  # Desenhar o texto na tela
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        UI_REFRESH_RATE = clock.tick(60)/1000
+        time_text = font.render("Time: {:.1f}".format(current_time), True, (255, 255, 255))
+        if timer_visible:
+            screen.blit(time_text, (10, 10))  # Desenhar o texto na tela
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry':
-            try:
-                float(event.text)
-                math_weight(0,event.text)
-            except ValueError:
-                print("Not a float")
-        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry2':
-            try:
-                float(event.text)
-                math_weight(1,event.text)
-            except ValueError:
-                print("Not a float")
-        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry3':
-            try:
-                float(event.text)
-                math_weight(2,event.text)
-            except ValueError:
-                print("Not a float")
-        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry4':
-            try:
-                float(event.text)
-                math_weight(3,event.text)
-            except ValueError:
-                print("Not a float")
-        if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry5':
-            try:
-                float(event.text)
-                math_weight(4,event.text)
-            except ValueError:
-                print("Not a float")
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry':
+                try:
+                    float(event.text)
+                    math_weight(0,event.text)
+                except ValueError:
+                    print("Not a float")
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry2':
+                try:
+                    float(event.text)
+                    math_weight(1,event.text)
+                except ValueError:
+                    print("Not a float")
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry3':
+                try:
+                    float(event.text)
+                    math_weight(2,event.text)
+                except ValueError:
+                    print("Not a float")
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry4':
+                try:
+                    float(event.text)
+                    math_weight(3,event.text)
+                except ValueError:
+                    print("Not a float")
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry5':
+                try:
+                    float(event.text)
+                    math_weight(4,event.text)
+                except ValueError:
+                    print("Not a float")
 
-        manager.process_events(event)
+            manager.process_events(event)
 
-    manager.update(UI_REFRESH_RATE)
+        manager.update(UI_REFRESH_RATE)
 
-    manager.draw_ui(screen)
-    pygame.display.update()
-    draw_game()
+        manager.draw_ui(screen)
+        pygame.display.update()
+        draw_game()
 
-    clock.tick(60)
+        clock.tick(60)
 
 
+main_menu()
 # Encerramento do Pygame
 pygame.quit()
