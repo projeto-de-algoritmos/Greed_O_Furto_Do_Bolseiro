@@ -4,6 +4,7 @@ import os
 import pygame_gui
 import copy
 import sys
+
 # Inicialização do Pygame
 pygame.init()
 
@@ -19,7 +20,7 @@ GREEN = (0, 255, 0)
 
 # Inicialização da janela do jogo
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Jogo da Mochila")
+pygame.display.set_caption("O Furto Do Bolseiro")
 
 clock = pygame.time.Clock()
 
@@ -63,14 +64,23 @@ def ramdom_pesos(items):
     available_weight = MAX_CAPACITY
     aux = available_weight * 3
 
-    items[0]["weight"] = random.randint(1,7)
-    items[1]["weight"] = random.randint(1,7)
+    for item in items:
+        if item["value"] >= 10:
+            item["weight"] = random.randint(1,9)
 
     for item in items:
         temp = random.randint(7,aux//2)
         if aux - temp >= 0 and item["weight"] == 0:
             item["weight"] += temp
             aux -= temp
+    return items
+
+def ramdom_values(items):
+    values = [13,11,9,7,5,3,1]
+    for item in items:
+        aux = random.choice(values)
+        item["value"] = aux
+        values.remove(aux)
     return items
     
 def draw_text(text, color, x, y, font_size):
@@ -96,7 +106,6 @@ def draw_border():
     for aux in range(1,10):
         screen.blit(border[1], (WIDTH - (WIDTH * 0.54), HEIGHT - (80 * aux)))
     
-
 def draw_game():
     global selected_items
 
@@ -126,12 +135,12 @@ def draw_game():
 def endgame():
     global selected_items, empty_item, available_weight, current_value, items, base_items
 
-    MENU_MOUSE_POS = pygame.mouse.get_pos()
     text_input.visible = False
     text_input2.visible = False
     text_input3.visible = False
     text_input4.visible = False
     text_input5.visible = False
+    MENU_MOUSE_POS = pygame.mouse.get_pos()
 
     screen.fill(BLACK)
     draw_text("Game Over, Mr. Baggins", WHITE, WIDTH * 0.45, HEIGHT - (HEIGHT * 0.97), 30)
@@ -239,34 +248,34 @@ def math_weight(item, text):
 def main_menu():
     global selected_items, empty_item, available_weight, current_value, items, base_items
     while True:
-        screen.fill(WHITE)
+        screen.fill(BLACK)
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
         # Texto do titulo
 
-        MENU_TEXT = font.render("TIP TOE - FALL GUYS", True, WHITE)
+        MENU_TEXT = font.render("Baggins' Theft", True, WHITE)
         MENU_RECT = MENU_TEXT.get_rect(center=(WIDTH/2, HEIGHT * 0.2))
 
         # Texto do rodape
 
         FOOTER_TEXT = font.render(
-            "Trabalho de Grafos 1 - @AntonioRangelC e @kessJhones", True, WHITE)
+            "Greed - @AntonioRangelC e @kessJhones", True, WHITE)
         FOOTER_RECT = FOOTER_TEXT.get_rect(center=(WIDTH/2, HEIGHT*0.9))
 
         # Definir os botões
 
-        PLAY_BUTTON = pygame.Rect((WIDTH/3), (HEIGHT/3), 300, 50)
+        PLAY_BUTTON = pygame.Rect((WIDTH/2) - 150, (HEIGHT/3), 300, 50)
         PLAY_TEXT = font.render("Start", True, WHITE)
         PLAY_TEXT_RECT = PLAY_TEXT.get_rect(center=PLAY_BUTTON.center)
 
         QUIT_BUTTON = pygame.Rect(
-            (WIDTH/3), (HEIGHT/3) + (HEIGHT * 0.30), 300, 50)
+            (WIDTH/2) - 150, (HEIGHT/3) + (HEIGHT * 0.10), 300, 50)
         QUIT_TEXT = font.render("Quit", True, WHITE)
         QUIT_TEXT_RECT = QUIT_TEXT.get_rect(center=QUIT_BUTTON.center)
 
-        pygame.draw.rect(screen, BLACK, PLAY_BUTTON)
-        pygame.draw.rect(screen, BLACK, QUIT_BUTTON)
+        pygame.draw.rect(screen, RED, PLAY_BUTTON)
+        pygame.draw.rect(screen, RED, QUIT_BUTTON)
 
         screen.blit(MENU_TEXT, MENU_RECT)
         screen.blit(PLAY_TEXT, PLAY_TEXT_RECT)
@@ -280,6 +289,7 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
                     config_items()
+                    reset_ui()
                     text_input.visible = True
                     text_input2.visible = True
                     text_input3.visible = True
@@ -291,6 +301,13 @@ def main_menu():
                     sys.exit()
 
         pygame.display.update()
+
+def reset_ui():
+    text_input.set_text('')
+    text_input2.set_text('')
+    text_input3.set_text('')
+    text_input4.set_text('')
+    text_input5.set_text('')
 
 def config_items():
     global items, base_items, selected_items, empty_item, available_weight, current_value, MAX_CAPACITY
@@ -311,6 +328,7 @@ def config_items():
         {"name": "green_gems", "value": 7,"weight": 0 , "image": None, "nickname":"Green Gems"}
     ]
 
+    items = ramdom_values(items)
     items = ramdom_pesos(items)
     base_items = copy.deepcopy(items)
 
@@ -343,6 +361,7 @@ def game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                sys.exit()
 
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == '#main_text_entry':
                 try:
@@ -384,7 +403,6 @@ def game():
         draw_game()
 
         clock.tick(60)
-
 
 main_menu()
 # Encerramento do Pygame
